@@ -1,1 +1,2 @@
-# build-publish-image-docker-action
+# base-action-config-build-publish
+## auto generate Dockerfile
