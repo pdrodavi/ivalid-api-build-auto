@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: ${APP_NAME:ivalid}
+
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: [ "health","prometheus", "metrics" ]
+  endpoint:
+    health:
+      show-details: ${SHOW_DETAILS:always}
+    metrics:
+      enabled: ${METRICS:true}
+    prometheus:
+      enabled: ${PROMETHEUS:true}
+
+server:
+  port: ${PORT:8080}
