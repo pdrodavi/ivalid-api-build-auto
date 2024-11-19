@@ -11,20 +11,43 @@ jobs:
       contents: read
       attestations: write
       id-token: write
+    
     steps:
+
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Read values.json
         id: values
         uses: juliangruber/read-file-action@v1
         with:
           path: ./ACTION_CONFIG/values.json
+
       - name: Set up JDK ${{ fromJson(steps.values.outputs.content).java }}
         uses: actions/setup-java@v4
         with:
           java-version: "${{ fromJson(steps.values.outputs.content).java }}"
           distribution: 'temurin'
           cache: maven
+
+      - name: Cache SonarQube Cloud packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Build and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=pdrodavi_ivalid-api
+
       - name: Build with Maven (Package)
         run: mvn -Dmaven.test.skip=true -Dmaven.test.failure.ignore clean package --file pom.xml
 
